@@ -7,3 +7,5 @@ lazy val root = (project in file("."))
 
 lazy val graphModule = project in file("GraphModule")
 
+//libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
+
