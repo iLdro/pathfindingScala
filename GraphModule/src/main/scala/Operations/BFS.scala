@@ -2,7 +2,7 @@ package Operations
 
 import Graphs.Graph
 
-object BFS {
+class BFS {
   def bfs[Vertex](start: Vertex, graph: Graph[Vertex]): Set[Vertex] = {
     def bfsVisit(vertices: Set[Vertex], visited: Set[Vertex]): Set[Vertex] = {
       if (vertices.isEmpty) visited
