@@ -1,7 +1,6 @@
 package Graphs
 
-
-class DirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends Graph[Vertex] {
+case class DirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends Graph[Vertex] {
     override def vertices: Set[Vertex] = adjList.keySet
 
     override def edges: List[(Vertex, Vertex)] = adjList.map {
@@ -23,5 +22,4 @@ class DirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends Graph[Ve
       val newAdjList = adjList + (source -> adjList(source).filter(_ != destination))
       new DirectedGraph(newAdjList)
     }
-
 }
