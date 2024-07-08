@@ -11,7 +11,7 @@ class DFSTest extends AnyFunSuiteLike {
     assert(dfs == Set("A", "B", "C", "E", "D"))
   }
 
-  test("longGraphDFS")
+  test("longGraphDFS"){
     val graph = new UnDirectedGraph(Map("A" -> List("B", "C", "D"),
                                         "B" -> List("A", "E"),
                                         "C" -> List("A", "F", "G"),
@@ -23,4 +23,5 @@ class DFSTest extends AnyFunSuiteLike {
                                         "I" -> List("F")))
     val dfs = DFS.dfs("A", graph, println)
     assert(dfs == Set("A", "B", "E", "H", "C", "F", "I", "G", "D"))
+  }
 }
