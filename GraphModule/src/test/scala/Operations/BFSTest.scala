@@ -4,7 +4,7 @@ import Graphs.UnDirectedGraph
 import org.scalatest.funsuite.AnyFunSuiteLike
 
 class BFSTest extends AnyFunSuiteLike {
-
+  val BFS = new BFS()
   test("testBfs") {
     val graph = new UnDirectedGraph(Map("A" -> List("B", "C"), "B" -> List("A"), "C" -> List("A")))
     val bfs = BFS.bfs("A", graph)
