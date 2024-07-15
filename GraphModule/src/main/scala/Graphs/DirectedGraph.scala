@@ -4,9 +4,8 @@ case class DirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends Gra
     override def vertices: Set[Vertex] = adjList.keySet
 
     override def edges: List[(Vertex, Vertex)] = adjList.map {
-      case (node, neighbours) => {
+      case (node, neighbours) =>
         neighbours.map(neighbour => (node, neighbour))
-      }
     }.flatten.toList
 
     override def neighbors(vertex: Vertex): List[Vertex] = {
@@ -31,7 +30,7 @@ object DirectedGraph {
   implicit def decoderString: JsonDecoder[DirectedGraph[String]] = DeriveJsonDecoder.gen[DirectedGraph[String]]
 
   implicit def encoderString: JsonEncoder[DirectedGraph[String]] = DeriveJsonEncoder.gen[DirectedGraph[String]]
-  
+
   implicit def decoderInt: JsonDecoder[DirectedGraph[Int]] = DeriveJsonDecoder.gen[DirectedGraph[Int]]
 
   implicit def encoderInt: JsonEncoder[DirectedGraph[Int]] = DeriveJsonEncoder.gen[DirectedGraph[Int]]

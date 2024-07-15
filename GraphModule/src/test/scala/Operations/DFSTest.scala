@@ -1,6 +1,6 @@
 package Operations
 
-import Graphs.UnDirectedGraph
+import Graphs.*
 import org.scalatest.funsuite.AnyFunSuiteLike
 
 class DFSTest extends AnyFunSuiteLike {

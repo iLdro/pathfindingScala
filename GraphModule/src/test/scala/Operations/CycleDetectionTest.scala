@@ -1,16 +1,21 @@
 package Operations
 
-import Graphs.UnDirectedGraph
+import Graphs.DirectedGraph
 import org.scalatest.funsuite.AnyFunSuiteLike
 
 class CycleDetectionTest extends AnyFunSuiteLike {
-  val cycleDetection = new CycleDetection()
 
-  test("testHasCycle") {
-    val graph = new UnDirectedGraph(Map("A" -> List("B", "C", "D"), "B" -> List("A"), "C" -> List("D", "E"), "D" -> List("A", "C"), "E" -> List("C")))
+  test("CycleDetectionTest") {
+    val graph = new DirectedGraph(Map("A" -> List("B", "C", "D"), "B" -> List("C"), "C" -> List("D"), "D" -> List()))
+    val cycleDetection = new CycleDetection()
     val hasCycle = cycleDetection.hasCycle(graph)
-    
-    assert(hasCycle == true)
+    assert(!hasCycle)
   }
 
+  test("CycleDetectionTestWithCycle") {
+    val graph = new DirectedGraph(Map("A" -> List("B", "C", "D"), "B" -> List("C"), "C" -> List("D"), "D" -> List("A")))
+    val cycleDetection = new CycleDetection()
+    val hasCycle = cycleDetection.hasCycle(graph)
+    assert(hasCycle)
+  }
 }

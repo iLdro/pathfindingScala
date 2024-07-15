@@ -2,25 +2,28 @@ package Operations
 
 import Graphs.Graph
 
-class TopologicalSorting {
-  def topologicalSort[Vertex](graph: Graph[Vertex]): Set[Vertex] = {
+class TopologicalSorting[Vertex] {
+
+  def topologicalSort(graph: Graph[Vertex]): List[Vertex] = {
     var visited = Set[Vertex]()
     var stack = List[Vertex]()
 
-    def dfsVisit(vertex: Vertex): Unit = {
+    def dfs(vertex: Vertex): Unit = {
+      visited += vertex
+      for (neighbor <- graph.neighbors(vertex)) {
+        if (!visited.contains(neighbor)) {
+          dfs(neighbor)
+        }
+      }
+      stack = vertex :: stack
+    }
+
+    for (vertex <- graph.vertices) {
       if (!visited.contains(vertex)) {
-        visited += vertex
-        graph.neighbors(vertex).foreach(dfsVisit)
-        stack = vertex :: stack
+        dfs(vertex)
       }
     }
 
-    graph.vertices.foreach{ vertex =>
-      if (!visited.contains(vertex)) {
-        dfsVisit(vertex)
-      }
-    }
-
-    stack.toSet
+    stack
   }
 }
