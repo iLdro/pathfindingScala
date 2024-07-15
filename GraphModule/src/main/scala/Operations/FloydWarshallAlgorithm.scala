@@ -7,7 +7,7 @@ class FloydWarshallAlgorithm[Vertex](graph: WeightedGraph[Vertex]) {
   private val vertexIndex: Map[Vertex, Int] = vertices.zipWithIndex.toMap
   private val size: Int = vertices.size
   private var dist: Array[Array[Int]] = Array.fill(size, size)(Int.MaxValue)
-  
+
   for (i <- 0 until size) {
     dist(i)(i) = 0
     for (edge <- graph.adjList.getOrElse(vertices(i), Nil)) {
