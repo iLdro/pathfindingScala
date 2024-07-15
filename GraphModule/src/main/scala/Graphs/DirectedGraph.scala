@@ -23,3 +23,16 @@ case class DirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends Gra
       new DirectedGraph(newAdjList)
     }
 }
+
+object DirectedGraph {
+
+  import zio.json._
+
+  implicit def decoderString: JsonDecoder[DirectedGraph[String]] = DeriveJsonDecoder.gen[DirectedGraph[String]]
+
+  implicit def encoderString: JsonEncoder[DirectedGraph[String]] = DeriveJsonEncoder.gen[DirectedGraph[String]]
+  
+  implicit def decoderInt: JsonDecoder[DirectedGraph[Int]] = DeriveJsonDecoder.gen[DirectedGraph[Int]]
+
+  implicit def encoderInt: JsonEncoder[DirectedGraph[Int]] = DeriveJsonEncoder.gen[DirectedGraph[Int]]
+}

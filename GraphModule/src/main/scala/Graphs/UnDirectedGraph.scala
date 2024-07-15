@@ -25,3 +25,16 @@ case class UnDirectedGraph[Vertex](adjList: Map[Vertex, List[Vertex]]) extends G
     UnDirectedGraph(updatedDestAdjList)
   }
 }
+
+object UnDirectedGraph {
+
+  import zio.json._
+
+  implicit def decoderString: JsonDecoder[UnDirectedGraph[String]] = DeriveJsonDecoder.gen[UnDirectedGraph[String]]
+
+  implicit def encoderString: JsonEncoder[UnDirectedGraph[String]] = DeriveJsonEncoder.gen[UnDirectedGraph[String]]
+
+  implicit def decoderInt: JsonDecoder[UnDirectedGraph[Int]] = DeriveJsonDecoder.gen[UnDirectedGraph[Int]]
+
+  implicit def encoderInt: JsonEncoder[UnDirectedGraph[Int]] = DeriveJsonEncoder.gen[UnDirectedGraph[Int]]
+}
