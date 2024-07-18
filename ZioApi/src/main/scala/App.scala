@@ -4,7 +4,7 @@ import zio.*
 import zio.json.*
 import zio.nio.file.Files
 import zio.nio.file.Path
-
+import izumi.reflect.dottyreflection.ReflectionUtil.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import scala.jdk.CollectionConverters.*
@@ -17,11 +17,13 @@ case object Weighted extends GraphType
 
 object GraphType {
   implicit val decoder: JsonDecoder[GraphType] = DeriveJsonDecoder.gen[GraphType]
+  implicit val encoder: JsonEncoder[GraphType] = DeriveJsonEncoder.gen[GraphType]
 }
 case class GraphTypeInfo(`type`: String)
 
 object GraphTypeInfo {
   implicit val decoder: JsonDecoder[GraphTypeInfo] = DeriveJsonDecoder.gen[GraphTypeInfo]
+  implicit val encoder: JsonEncoder[GraphTypeInfo] = DeriveJsonEncoder.gen[GraphTypeInfo]
 }
 object App extends ZIOAppDefault {
 
@@ -79,7 +81,8 @@ object App extends ZIOAppDefault {
                  |2. Remove Edge
                  |3. List Vertices
                  |4. List Edges
-                 |5. Exit
+                 |5. Save to JSON
+                 |6. Exit
                  |Choose an option: """.stripMargin
 
     def addEdge(graph: Graph[T]): ZIO[Any, Throwable, Graph[T]] =
@@ -113,6 +116,14 @@ object App extends ZIOAppDefault {
     def listEdges(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
       printLine(s"Edges: ${graph.edges.mkString(", ")}")
 
+    def saveToJson(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      for {
+        _ <- printLine("Enter the path to save the JSON file")
+        path <- readLine
+        json <- ZIO.succeed(graph.toJson)
+        _ <- Files.writeBytes(Paths.get(path), Chunk.fromArray(json.getBytes(StandardCharsets.UTF_8)))
+      } yield ()
+
     def loop(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
       (for {
         _ <- printLine(menu)
@@ -122,7 +133,8 @@ object App extends ZIOAppDefault {
           case "2" => removeEdge(graph).flatMap(loop)
           case "3" => listVertices(graph) *> loop(graph)
           case "4" => listEdges(graph) *> loop(graph)
-          case "5" => ZIO.succeed(())
+          case "5" => saveToJson(graph) *> loop(graph)
+          case "6" => ZIO.unit
           case _ => printLine("Invalid option, try again.") *> loop(graph)
         }
       }yield ()).catchAll(err => printLine(s"Error: $err") *> loop(graph))
