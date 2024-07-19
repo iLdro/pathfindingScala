@@ -1,5 +1,6 @@
 import zio.Console.*
 import Graphs.*
+import Operations.*
 import zio.*
 import zio.json.*
 import zio.nio.file.Files
@@ -7,6 +8,7 @@ import zio.nio.file.Path
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import scala.jdk.CollectionConverters.*
+import zio.{ZIO, UIO, RIO}
 
 sealed trait GraphType
 
@@ -39,21 +41,21 @@ object App extends ZIOAppDefault {
           val result = json.fromJson[DirectedGraph[String]]
           result.fold(
             err => printLine(s"Error parsing JSON for DirectedGraph[String]: $err").mapError(new Exception(_)),
-            graph => graphOperationsMenu(graph)
+            graph => graphOperationsMenu(graph, graphType)
           )
         case "undirected" =>
           json.fromJson[UnDirectedGraph[String]].fold(
             err => printLine(s"Error parsing JSON for UnDirectedGraph[String]: $err").mapError(new Exception(_)),
-            graph => graphOperationsMenu(graph)
+            graph => graphOperationsMenu(graph, graphType)
           )
         case "weighted" =>
           json.fromJson[WeightedGraph[String]].fold(
             err => printLine(s"Error parsing JSON for WeightedGraph[String]: $err").mapError(new Exception(_)),
-            graph => graphOperationsMenu(graph)
+            graph => graphOperationsMenu(graph, graphType)
           ).orElse(
             json.fromJson[WeightedGraph[Int]].fold(
               err => printLine(s"Error parsing JSON for WeightedGraph[Int]: $err").mapError(new Exception(_)),
-              graph => graphOperationsMenu(graph)
+              graph => graphOperationsMenu(graph, graphType)
             )
           )
         case _ => printLine(s"Unsupported graph type: $graphType").mapError(new Exception(_))
@@ -74,7 +76,7 @@ object App extends ZIOAppDefault {
       content = new String(bytes.toArray, StandardCharsets.UTF_8)
     } yield content
 
-  def graphOperationsMenu[T](graph: Graph[T]): ZIO[Any, Throwable, Unit] = {
+  def graphOperationsMenu[T](graph: Graph[T], graphType: String): ZIO[Any, Throwable, Unit] = {
     val menu = """
                  |1. Add Edge
                  |2. Remove Edge

@@ -1,0 +1,8 @@
+{
+  "type": "weighted",
+  "adjList": {
+    "A": [{"destination": "B", "weight": 5}, {"destination": "C", "weight": 10}],
+    "B": [{"destination": "A", "weight": 5}],
+    "C": [{"destination": "A", "weight": 10}]
+  }
+}
