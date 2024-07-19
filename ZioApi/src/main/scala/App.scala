@@ -4,7 +4,6 @@ import zio.*
 import zio.json.*
 import zio.nio.file.Files
 import zio.nio.file.Path
-import izumi.reflect.dottyreflection.ReflectionUtil.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import scala.jdk.CollectionConverters.*
@@ -81,8 +80,13 @@ object App extends ZIOAppDefault {
                  |2. Remove Edge
                  |3. List Vertices
                  |4. List Edges
-                 |5. Save to JSON
-                 |6. Exit
+                 |5. DFS (all type of graph)
+                 |6. BFS (all type of graph)
+                 |7. Topological Sorting (Directed Graph)
+                 |8. CycleDetection (Directed Graph)
+                 |9. Floyd Algorithm (Weighted Graph)
+                 |10. Dijkstra Algorithm (Weighted Graph)
+                 |11. Exit
                  |Choose an option: """.stripMargin
 
     def addEdge(graph: Graph[T]): ZIO[Any, Throwable, Graph[T]] =
@@ -116,12 +120,73 @@ object App extends ZIOAppDefault {
     def listEdges(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
       printLine(s"Edges: ${graph.edges.mkString(", ")}")
 
-    def saveToJson(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+    def performDFS(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
       for {
-        _ <- printLine("Enter the path to save the JSON file")
-        path <- readLine
-        json <- ZIO.succeed(graph.toJson)
-        _ <- Files.writeBytes(Paths.get(path), Chunk.fromArray(json.getBytes(StandardCharsets.UTF_8)))
+        _ <- printLine("Enter the starting vertex for DFS:")
+        startVertexInput <- readLine
+        startVertex = startVertexInput.asInstanceOf[T]
+        dfsResult = new DFS().dfs(startVertex, graph, v => printLine(s"Visited vertex: $v"))
+        _ <- printLine(s"DFS traversal result: ${dfsResult.mkString(", ")}")
+      } yield ()
+
+    def performBFS(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      for {
+        _ <- printLine("Enter the starting vertex for BFS:")
+        startVertexInput <- readLine
+        startVertex = startVertexInput.asInstanceOf[T]
+        dfsResult = new BFS().bfs(startVertex, graph)
+        _ <- printLine(s"BFS traversal result: ${dfsResult.mkString(", ")}")
+      } yield ()
+
+    def performTopologicalSorting(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      if (graphType == "directed") {
+        val topologicalSorter = new TopologicalSorting[T]
+        val sortedList = topologicalSorter.topologicalSort(graph.asInstanceOf[DirectedGraph[T]])
+        printLine(s"Topological sorting result: ${sortedList.mkString(", ")}")
+      } else {
+        printLine("Topological Sorting is only supported for directed graphs.")
+      }
+
+    def performCycleDetection(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      if (graphType == "directed") {
+        val CycleDetector = new CycleDetection()
+        val CycleResult = CycleDetector.hasCycle(graph)
+        printLine(s"Cycle Detection result: ${CycleResult}")
+      } else {
+        printLine("Cycle Detection is only supported for directed graphs.")
+      }
+
+    def performFloydAlgorithm(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      graph match {
+        case g: WeightedGraph[T] =>
+          val floydWarshall = new FloydWarshallAlgorithm(g)
+          val shortestPaths = floydWarshall.computeShortestPaths()
+          printLine(s"Floyd Algorithm result: ${shortestPaths.map(_.mkString(", ")).mkString("\n")}")
+        case _ =>
+          printLine("Floyd-Warshall Algorithm is only supported for weighted graphs.")
+      }
+
+    def performDijkstraAlgorithm(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
+      graph match {
+        case weightedGraph: WeightedGraph[T] =>
+          for {
+            _ <- printLine("Enter the source vertex for Dijkstra's algorithm:")
+            sourceInput <- readLine
+            source = sourceInput.asInstanceOf[T]
+            dijkstra = new DijkstraAlgorithm(weightedGraph)
+            (distances, predecessors) = dijkstra.shortestPath(source)
+            _ <- printLine(s"Shortest distances from $source: ${distances.mkString(", ")}")
+            _ <- printLine(s"Predecessors: ${predecessors.mkString(", ")}")
+          } yield ()
+        case _ =>
+          printLine("Dijkstra's Algorithm is only supported for weighted graphs.")
+      }
+
+
+    def writeFile(path: String, content: String): ZIO[Any, Throwable, Unit] =
+      for {
+        path <- ZIO.attempt(zio.nio.file.Path(path))
+        _ <- zio.nio.file.Files.writeBytes(path, zio.Chunk.fromArray(content.getBytes(StandardCharsets.UTF_8)))
       } yield ()
 
     def loop(graph: Graph[T]): ZIO[Any, Throwable, Unit] =
@@ -133,13 +198,18 @@ object App extends ZIOAppDefault {
           case "2" => removeEdge(graph).flatMap(loop)
           case "3" => listVertices(graph) *> loop(graph)
           case "4" => listEdges(graph) *> loop(graph)
-          case "5" => saveToJson(graph) *> loop(graph)
-          case "6" => ZIO.unit
+          case "5" => performDFS(graph) *> loop(graph)
+          case "6" => performBFS(graph) *> loop(graph)
+          case "7" => performTopologicalSorting(graph) *> loop(graph)
+          case "8" => performCycleDetection(graph) *> loop(graph)
+          case "9" => performFloydAlgorithm(graph) *> loop(graph)
+          case "10" => performDijkstraAlgorithm(graph) *> loop(graph)
+          case "11" => ZIO.unit
           case _ => printLine("Invalid option, try again.") *> loop(graph)
         }
       }yield ()).catchAll(err => printLine(s"Error: $err") *> loop(graph))
-
     loop(graph)
+
 }
 
 }
